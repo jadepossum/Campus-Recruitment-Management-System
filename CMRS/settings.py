@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(4(ur#^id&mxcbn!gs+ygr1+0+j$kbr_mdr_ec0efdbw6b8s4-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cmrs_web_app.apps.CmrsWebAppConfig',
     'rest_framework',
+    'rest_framework.authtoken',
+    'import_export',
     'corsheaders'
 ]
 
