@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from .models import Jobs,UserLogin,Student,Internship,Certification
+from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria
 from django.contrib.auth.models import User
 
-class JobSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Jobs
-        fields = '__all__'
+# class JobSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Jobs
+#         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta(object):
@@ -25,4 +25,20 @@ class InternshipSerializer(serializers.ModelSerializer):
 class CertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certification
+        fields = '__all__'
+
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Jobs
+        fields = '__all__'
+
+class ImportantDateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImportantDates
+        fields = ['id','Job','Date','EventTitle']
+        # fields = '__all__'
+
+class EligibilityCriteriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EligibilityCriteria
         fields = '__all__'
