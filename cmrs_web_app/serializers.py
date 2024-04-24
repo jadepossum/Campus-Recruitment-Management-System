@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria
+from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Application
 from django.contrib.auth.models import User
 
 # class JobSerializer(serializers.ModelSerializer):
@@ -15,7 +15,14 @@ class UserSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['roll_number','name','email','cgpa','skills','twelthPercentage','tenthCGPA','BackLogCount','github_profile','linkedin_profile','portfolio_website','phone']
+        fields = ['roll_number','name','email','cgpa','skills','twelthPercentage'
+                  ,'tenthCGPA','BackLogCount','github_profile','linkedin_profile',
+                  'portfolio_website','phone','branch','batchYear','year_gap']
+
+class StudentBranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['roll_number','name']
 
 class InternshipSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,3 +49,8 @@ class EligibilityCriteriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = EligibilityCriteria
         fields = '__all__'
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Application
+        fields = ['job', 'student', 'branch', 'batchYear']

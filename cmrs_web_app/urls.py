@@ -6,7 +6,12 @@ urlpatterns = [
     path('login',views.userLogin),
     path('checklogin',views.userAuthenticate),
     path('getjobs',views.getJobPost),
-    path('profile',views.sendProfile),
+    path('getcomplist',views.sendCompanyList),
+    path('resbybranch',views.sendResultByBranch),
+    path('resbyjob',views.sendProfileByJob),
+    path('getprofile',views.sendProfile),
+    path('getbranchprofiles',views.sendAllProfiles),
+    path('getbranch',views.getBranches),
     path('uploadCert',views.uploadCert),
     path('uploadIntern',views.uploadIntern),
 ]

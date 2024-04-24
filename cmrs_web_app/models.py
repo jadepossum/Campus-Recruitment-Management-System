@@ -1,3 +1,5 @@
+
+from typing import Iterable
 from django.db import models
 from django.core.validators import RegexValidator
 import datetime
@@ -70,30 +72,25 @@ class ImportantDates(models.Model):
         ordering = ['Job','-Date']
 
 class StudentFeedback(models.Model):
-    Job = models.ForeignKey(Jobs, on_delete=models.CASCADE)
     imp_date = models.ForeignKey(ImportantDates, on_delete=models.CASCADE)
     RollNumber = models.ForeignKey('Student', on_delete=models.CASCADE)
-    PhaseNo = models.IntegerField(null=True)
-    PhaseTitle = models.CharField(max_length=50, null=True)
     PhaseFeedback = models.TextField(null=True)
     Rating = models.IntegerField(null=True)  # A rating out of 5 or 10 for the phase
-    DifficultyLevel = models.CharField(max_length=50, null=True)  # Difficulty level of the phase
-    Suggestions = models.TextField(null=True)  # Any suggestions for improvement
-    WouldRecommend = models.BooleanField(default=False)  # Would the student recommend this job to others
 
     class Meta:
-        unique_together = ('Job', 'RollNumber', 'PhaseNo')  # Ensures a student can only give feedback once for each phase of a job
+        unique_together = ('imp_date', 'RollNumber',)
+        ordering = ['-imp_date', 'RollNumber']  # Ensures a student can only give feedback once for each phase of a job
 
     def __str__(self):
-        return self.Title
+        return self.RollNumber.name + " - " + str(self.imp_date)
 
 class Branch(models.Model):
     BRANCH_CHOICES = [
-        ('C.S.E', 'Computer Science and Engineering'),
-        ('E.E.E', 'Electrical and Electronics Engineering'),
-        ('I.T', 'Information Technology'),
-        ('M.E.', 'Mechanical Engineering'),
-        ('E.C.E', 'Electronics and Communication Engineering'),
+        ('CSE', 'CSE'),
+        ('EEE', 'EEE'),
+        ('IT', 'IT'),
+        ('ME.', 'ME'),
+        ('ECE', 'ECE'),
     ]
     name = models.CharField(max_length=100, choices=BRANCH_CHOICES)
     departmentHead = models.CharField(max_length=100)
@@ -109,23 +106,44 @@ class Student(models.Model):
     twelthPercentage = models.FloatField(null = True)
     tenthCGPA = models.FloatField(null = True)
     BackLogCount = models.IntegerField(null = True)
-    Gap = models.BooleanField(null = True)
     github_profile = models.URLField(max_length=200, null=True, blank=True)
     linkedin_profile = models.URLField(max_length=200, null=True, blank=True)
     portfolio_website = models.URLField(max_length=200, null=True, blank=True)
     phone = models.CharField(max_length=10, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], default='Male')
-    # branch = models.ForeignKey(Branch, on_delete=models.CASCADE,default=1)    
+    BRANCH_CHOICES = [
+        ('CSE', 'CSE'),
+        ('EEE', 'EEE'),
+        ('IT', 'IT'),
+        ('ME.', 'ME'),
+        ('ECE', 'ECE'),
+    ]
+    branch = models.CharField(max_length=100, choices=BRANCH_CHOICES, default='CSE')
+    batchYear = models.IntegerField(default=2024)
+    year_gap = models.BooleanField(default=False)
     # photo = models.ImageField(upload_to='photos/%Y/%m/%d/')
     # resume = models.FileField(upload_to='resumes/')
     def __str__(self):
         return self.name
+    def save(self, *args, **kwargs) -> None:
+        batch = int(self.roll_number[0:2])
+        discipline = self.roll_number[4]
+        Branch_code = int(self.roll_number[6:8])
+        branchlist = {5: "CSE", 2: "EEE", 12: "IT", 3: "ME", 4: "ECE"}
+        if discipline == '1' :
+            self.batchYear = 2000 + batch
+        else :
+            self.batchYear = 2000 + batch - 1
+        if Branch_code in branchlist:
+            self.branch = branchlist[Branch_code]
+        return super().save(*args,**kwargs)
+    
 
 class EligibilityCriteria(models.Model):
     job = models.ForeignKey(Jobs, on_delete=models.CASCADE)
     min_cgpa = models.FloatField(default=7.0)
     max_backlog_count = models.IntegerField(default=0)
-    skills_required = models.CharField(max_length=250, blank=True)
+    skills_required = models.CharField(max_length=250, blank=True,null=True)
     min_twelth_percentage = models.FloatField(null=True,default=80)
     min_tenth_cgpa = models.FloatField(null=True,default=7.0)
     no_gap_year = models.BooleanField(default=True)
@@ -135,11 +153,28 @@ class EligibilityCriteria(models.Model):
 class Application(models.Model):
     job = models.ForeignKey(Jobs, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    branch = models.CharField(max_length=5,default="CSE")
+    batchYear = models.IntegerField(default=2020)
     application_date = models.DateField(auto_now_add=True)
-    # status = models.CharField(max_length=50, choices=[('APPLIED', 'Applied'), ('REJECTED', 'Rejected'), ('ACCEPTED', 'Accepted')], default='APPLIED')
+    status = models.CharField(max_length=50, choices=[('APPLIED', 'Applied'), ('REJECTED', 'Rejected'), ('ACCEPTED', 'Accepted')], default='APPLIED')
     is_accepted = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.student.name} - {self.job.Title}"
+    class Meta:
+        ordering = ['-job','-application_date']
+    def save(self,*args, **kwargs) -> None:
+        rollNumber = self.student.roll_number
+        batch = int(rollNumber[0:2])
+        discipline = rollNumber[4]
+        Branch_code = int(rollNumber[6:8])
+        branchlist = {5: "CSE", 2: "EEE", 12: "IT", 3: "ME", 4: "ECE"}
+        if discipline == '1' :
+            self.batchYear = 2000 + batch
+        else :
+            self.batchYear = 2000 + batch - 1
+        if Branch_code in branchlist:
+            self.branch = branchlist[Branch_code]
+        return super().save(*args, **kwargs)
 
 
 
@@ -173,3 +208,12 @@ class Certification(models.Model):
     skills = models.CharField(max_length=200)
     domain_technology = models.CharField(max_length=100)
     year_earned = models.DateField()
+
+class TPODetails(models.Model):
+    Name  = models.CharField(max_length=100)
+    Phone = models.CharField(max_length=10)
+    Email = models.EmailField(max_length=254)
+    CurrentBatchYear = models.IntegerField()
+
+    def __str__(self):
+        return self.Name + " | TPO"

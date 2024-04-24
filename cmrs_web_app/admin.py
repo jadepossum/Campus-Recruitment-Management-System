@@ -1,6 +1,6 @@
 from django.contrib import admin
 from import_export import resources
-from .models import Student,Internship,Project,Certification,Jobs,Company,ImportantDates,StudentFeedback,Branch,EligibilityCriteria
+from .models import Student,Internship,TPODetails,Project,Certification,Jobs,Company,ImportantDates,StudentFeedback,Branch,EligibilityCriteria,Application
 from import_export.admin import ImportExportModelAdmin
 
 class StudentResource(resources.ModelResource):
@@ -34,13 +34,14 @@ class EligibilityCriteriaAdmin(ImportExportModelAdmin):
     list_display = ['job','min_cgpa','max_backlog_count','skills_required','min_twelth_percentage','min_tenth_cgpa','no_gap_year']
 
 #Register your models here.
-admin.site.register(Jobs,JobsAdmin)
 admin.site.register(Company)
+admin.site.register(Jobs,JobsAdmin)
 admin.site.register(EligibilityCriteria,EligibilityCriteriaAdmin)
 admin.site.register(ImportantDates)
+admin.site.register(Application)
 admin.site.register(StudentFeedback)
-# admin.site.register(UserLogin)
 
+admin.site.register(TPODetails)
 
 admin.site.register(Student,StudentAdmin)
 admin.site.register(Branch)
