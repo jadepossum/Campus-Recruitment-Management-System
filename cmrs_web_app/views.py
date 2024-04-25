@@ -146,14 +146,14 @@ def sendProfileByJob(request):
     
 @api_view(["GET"])
 def sendProfile(request):
-    rollNumber = request.GET['rollNumber']
+    rollNumber = request.GET['studentid']
     student = Student.objects.filter(roll_number = rollNumber).first()
     internshipDetails = Internship.objects.filter(roll_number = rollNumber)
     certificationDetails = Certification.objects.filter(roll_number = rollNumber)
     return Response({
         "studentDetails":StudentSerializer(student,many=False).data if student else {"data":"data not found"},
-        "internshipDetails":InternshipSerializer(internshipDetails,many=True).data if internshipDetails.exists() else {"data":"data not found"},
-        "certificationDetails":CertificationSerializer(certificationDetails,many=True).data if certificationDetails.exists() else {"data":"data not found"},
+        "internshipDetails":InternshipSerializer(internshipDetails,many=True).data if internshipDetails.exists() else [],
+        "certificationDetails":CertificationSerializer(certificationDetails,many=True).data if certificationDetails.exists() else [],
     })
 
 @api_view(["GET"])

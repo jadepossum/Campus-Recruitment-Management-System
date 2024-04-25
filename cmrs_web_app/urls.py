@@ -9,7 +9,7 @@ urlpatterns = [
     path('getcomplist',views.sendCompanyList),
     path('resbybranch',views.sendResultByBranch),
     path('resbyjob',views.sendProfileByJob),
-    path('getprofile',views.sendProfile),
+    path('getstudentprofile',views.sendProfile),
     path('getbranchprofiles',views.sendAllProfiles),
     path('getbranch',views.getBranches),
     path('uploadCert',views.uploadCert),
