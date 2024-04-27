@@ -2,7 +2,7 @@ from rest_framework import status
 from django.shortcuts import render,get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Branch,Application,TPODetails
+from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Branch,Application,TPODetails,StudentFeedback
 from .serializers import UserSerializer,StudentSerializer,InternshipSerializer,CertificationSerializer,JobSerializer,ImportantDateSerializer,EligibilityCriteriaSerializer,StudentBranchSerializer,ApplicationSerializer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -97,12 +97,23 @@ def getJobPost(request):
         print(str(e))
         return Response({"err_details": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-@api_view(["POST"])
-def setJobPost(request):
-    serealizer = JobSerializer(data=request.data)
-    if serealizer.is_valid():
-        serealizer.save()
-    return Response(serealizer.data)
+@api_view(["GET"])
+def getFeedbacks(request):
+    eventid = int(request.GET['eventid'])
+    feedbacks = StudentFeedback.objects.all()
+    resp_list = []
+    for feedback in feedbacks:
+        if feedback.imp_date.id==eventid:
+            resp = {}
+            resp["feedback_id"]  = feedback.id
+            resp["event"] = feedback.imp_date.EventTitle
+            resp["event_id"] = feedback.imp_date.id
+            resp["student_name"] = feedback.RollNumber.name
+            resp["roll_number"]  = feedback.RollNumber.roll_number
+            resp["feedback"]     = feedback.PhaseFeedback
+            resp_list.append(resp)
+    
+    return Response({"feedbacks":resp_list})
 
 @api_view(["GET"])
 def sendCompanyList(request):
