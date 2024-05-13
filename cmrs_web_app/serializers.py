@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Application
+from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Application,StudentFeedback
 from django.contrib.auth.models import User
 
 # class JobSerializer(serializers.ModelSerializer):
@@ -54,3 +54,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ['job', 'student', 'branch', 'batchYear']
+
+class FeedBackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentFeedback
+        fields = ['imp_date','RollNumber','PhaseFeedback']

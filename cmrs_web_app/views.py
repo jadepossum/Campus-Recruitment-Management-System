@@ -3,7 +3,7 @@ from django.shortcuts import render,get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Student,Internship,Certification,Jobs,ImportantDates,EligibilityCriteria,Branch,Application,TPODetails,StudentFeedback
-from .serializers import UserSerializer,StudentSerializer,InternshipSerializer,CertificationSerializer,JobSerializer,ImportantDateSerializer,EligibilityCriteriaSerializer,StudentBranchSerializer,ApplicationSerializer
+from .serializers import UserSerializer,StudentSerializer,InternshipSerializer,CertificationSerializer,JobSerializer,ImportantDateSerializer,EligibilityCriteriaSerializer,StudentBranchSerializer,ApplicationSerializer,FeedBackSerializer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage
@@ -73,7 +73,7 @@ def userAuthenticate(request):
 @api_view(["GET"])
 def getJobPost(request):
     try:
-        paginate_by = 10
+        paginate_by = 20
         JobPosts = Jobs.objects.all().order_by("-PostedDate","-id")
         paginator = Paginator(JobPosts,paginate_by)
         page_number = request.GET.get('page')
@@ -114,6 +114,23 @@ def getFeedbacks(request):
             resp_list.append(resp)
     
     return Response({"feedbacks":resp_list})
+
+@api_view(["POSt"])
+def writeFeedback(request):
+    event_id = request.data['imp_date']
+    roll_number = request.data['RollNumber']
+    feedback = StudentFeedback.objects.filter(RollNumber = roll_number,imp_date = event_id).first()
+    if feedback :
+        feedback.PhaseFeedback = request.data['PhaseFeedback']
+        feedback.save()
+        return Response({"msg":"feedback updated"})
+    
+    serializer = FeedBackSerializer(data = request.data)
+    if(serializer.is_valid()):
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors)
 
 @api_view(["GET"])
 def sendCompanyList(request):

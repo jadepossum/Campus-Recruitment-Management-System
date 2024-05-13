@@ -7,6 +7,7 @@ urlpatterns = [
     path('checklogin',views.userAuthenticate),
     path('getjobs',views.getJobPost),
     path('getFeedbacks',views.getFeedbacks),
+    path('writeFeedback',views.writeFeedback),
     path('getcomplist',views.sendCompanyList),
     path('resbybranch',views.sendResultByBranch),
     path('resbyjob',views.sendProfileByJob),
