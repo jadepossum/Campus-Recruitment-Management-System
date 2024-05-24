@@ -41,6 +41,7 @@ class Jobs(models.Model):
     ExperienceLevel = models.CharField(max_length=50, choices=[('EN', 'Entry Level'), ('IN', 'Intermediate'), ('EX', 'Experienced')], null=True)  # The experience level required for the job
     PostedDate = models.DateField(default=datetime.date(2023, 12, 12))  # The date the job was posted
     ApplyLink = models.URLField(max_length=200, null=True)
+    IsDirectApply = models.BooleanField(default=True,null=True)
     def __str__(self):
         return self.Title + " | " + self.Company
 
@@ -70,6 +71,7 @@ class ImportantDates(models.Model):
     class meta:
         unique_together = ('Job', 'Date')
         ordering = ['Job','-Date']
+        
 
 class StudentFeedback(models.Model):
     imp_date = models.ForeignKey(ImportantDates, on_delete=models.CASCADE)

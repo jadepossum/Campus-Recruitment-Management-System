@@ -22,19 +22,20 @@ def userLogin(request):
     if not user.check_password(request.data['password']):
         # return Response({"detail":"Password doesn't match","err":"yes"},status=status.HTTP_404_NOT_FOUND)
         return Response({"detail":"Password doesn't match","err":"yes"})
-    
     currentbatchyear = TPODetails.objects.first().CurrentBatchYear
     token ,created = Token.objects.get_or_create(user=user)
     serializer = UserSerializer(instance=user)
     studentDetails = Student.objects.filter(roll_number = username).first()
     internshipDetails = Internship.objects.filter(roll_number = username)
     certificationDetails = Certification.objects.filter(roll_number = username)
+    myApplications = Application.objects.filter(student = username)
     return Response({"studentDetails":StudentSerializer(studentDetails,many=False).data if studentDetails else {"data":"data unavailable"},
                      "internshipDetails":InternshipSerializer(internshipDetails,many=True).data if internshipDetails.exists() else {"data":"data unavailable"},
                      "certificationDetails":CertificationSerializer(certificationDetails,many=True).data if certificationDetails.exists() else {"data":"data unavailable"},
                      "token":token.key,
                      "user":serializer.data,
-                     "currentBatchYear":currentbatchyear
+                     "currentBatchYear":currentbatchyear,
+                     "myApplications":ApplicationSerializer(myApplications,many=True).data
                      })
 
 
@@ -132,13 +133,31 @@ def writeFeedback(request):
     else:
         return Response(serializer.errors)
 
+
+@api_view(["POSt"])
+def directApply(request):
+    rollNumber = request.data['student']
+    jobid = request.data['job']
+    application = Application.objects.filter(student=rollNumber,job=jobid).first()
+    if application :
+        return Response({"msg":"Already Applied"})
+    else:
+        serializer = ApplicationSerializer(data = request.data)
+        if(serializer.is_valid()):
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+    pass
+
 @api_view(["GET"])
 def sendCompanyList(request):
     applications = Application.objects.all()
     resp = {}
     resp_list = []
     for application in applications:
-        resp[application.job.__str__()] = application.job.id
+        if(application.is_accepted):
+            resp[application.job.__str__()] = application.job.id
     return Response({"company_list":resp.items()})
 
 @api_view(["GET"])
@@ -163,6 +182,8 @@ def sendProfileByJob(request):
     applications = Application.objects.filter(job=jobid,batchYear=2020)
     resp_list =[]
     for appication in applications:
+        if(not appication.is_accepted):
+            continue
         resp = {}
         resp["student_name"] = appication.student.name
         resp["roll_number"]  = appication.student.roll_number
